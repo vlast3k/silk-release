@@ -118,11 +118,14 @@ func (m *SinglePollCycle) DoASGCycle() error {
 func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 
 	t := time.Now().UnixMilli()
-	m.logger.Debug("poll-cycle-asg-lock.before_"+string(len(containers))+"_"+string(t), lager.Data{"containers": containers})
+	defer m.logger.Debug("poll-cycle-asg.done")
 
+	m.logger.Debug("poll-cycle-asg-lock.before_"+strconv.Itoa(len(containers))+"_"+strconv.FormatInt(t, 10), lager.Data{"containers": containers})
+	time.Sleep(1 * time.Millisecond)
 	m.asgMutex.Lock()
 
-	m.logger.Debug("poll-cycle-asg-lock.after"+string(len(containers))+"_"+string(t)+"_"+string((time.Now().UnixMilli()-t)/1000), lager.Data{"duration": time.Now().UnixMilli() - t, "containers": containers})
+	m.logger.Debug("poll-cycle-asg-lock.after"+strconv.Itoa(len(containers))+"_"+strconv.FormatInt(t, 10)+"_"+strconv.Itoa((int)(time.Now().UnixMilli()-t)/1000), lager.Data{"duration": time.Now().UnixMilli() - t, "containers": containers})
+	time.Sleep(1 * time.Millisecond)
 
 	if m.asgRuleSets == nil {
 		m.asgRuleSets = make(map[enforcer.LiveChain]enforcer.RulesWithChain)
@@ -160,6 +163,7 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 					"old rules":     oldRuleSet,
 					"new rules":     ruleset,
 				})
+				time.Sleep(1 * time.Millisecond)
 				chain, err := m.enforcer.EnforceRulesAndChain(ruleset)
 				if err != nil {
 					if _, ok := err.(*enforcer.CleanupErr); ok {
@@ -170,6 +174,9 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 				} else {
 					m.updateRuleSet(chainKey, chain, ruleset)
 				}
+			} else {
+				m.logger.Debug("poll-cycle-asg.-notingtodo")
+				time.Sleep(1 * time.Millisecond)
 			}
 			desiredChains = append(desiredChains, enforcer.LiveChain{Table: ruleset.Chain.Table, Name: m.containerToASGChain[chainKey]})
 		}

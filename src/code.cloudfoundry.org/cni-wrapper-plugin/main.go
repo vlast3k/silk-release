@@ -197,7 +197,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 	}
 
 	fmt.Fprintf(os.Stderr, "force-asgs-for-container vladi: %s", args.ContainerID)
-	fmt.Fprintf(os.Stdout, "force-asgs-for-container vladi oooooooo: %s", args.ContainerID)
+	//fmt.Fprintf(os.Stdout, "force-asgs-for-container vladi oooooooo: %s", args.ContainerID)
 	resp, err = http.DefaultClient.Get(fmt.Sprintf("http://%s/force-asgs-for-container?container=%s", cfg.PolicyAgentForcePollAddress, args.ContainerID))
 	if err != nil {
 		return err

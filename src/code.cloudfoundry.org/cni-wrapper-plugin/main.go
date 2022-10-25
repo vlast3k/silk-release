@@ -196,6 +196,8 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return fmt.Errorf("bulk insert: %s", err) // not tested
 	}
 
+	fmt.Fprintf(os.Stderr, "force-asgs-for-container vladi: %s", args.ContainerID)
+	fmt.Fprintf(os.Stdout, "force-asgs-for-container vladi oooooooo: %s", args.ContainerID)
 	resp, err = http.DefaultClient.Get(fmt.Sprintf("http://%s/force-asgs-for-container?container=%s", cfg.PolicyAgentForcePollAddress, args.ContainerID))
 	if err != nil {
 		return err

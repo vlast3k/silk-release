@@ -142,7 +142,7 @@ func (p *VxlanPolicyPlanner) readFile(specifiedContainers ...string) ([]containe
 		})
 	}
 	containerMetadataDuration := time.Now().Sub(containerMetadataStartTime)
-	p.Logger.Debug("got-containers", lager.Data{"containers": allContainers})
+	p.Logger.Debug("got-containers", lager.Data{"containers": len(allContainers)})
 	p.MetricsSender.SendDuration(metricContainerMetadata, containerMetadataDuration)
 
 	sort.Slice(allContainers, func(i, j int) bool {

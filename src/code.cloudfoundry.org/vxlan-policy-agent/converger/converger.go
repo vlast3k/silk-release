@@ -117,12 +117,12 @@ func (m *SinglePollCycle) DoASGCycle() error {
 
 func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 
-	m.logger.Debug("poll-cycle-asg-lock.before", lager.Data{"containers": containers})
-	t := time.Now()
+	t := time.Now().UnixMilli()
+	m.logger.Debug("poll-cycle-asg-lock.before_"+string(len(containers))+"_"+string(t), lager.Data{"containers": containers})
 
 	m.asgMutex.Lock()
 
-	m.logger.Debug("poll-cycle-asg-lock.after", lager.Data{"duration": t})
+	m.logger.Debug("poll-cycle-asg-lock.after"+string(len(containers))+"_"+string(t)+"_"+string((time.Now().UnixMilli()-t)/1000), lager.Data{"duration": time.Now().UnixMilli() - t, "containers": containers})
 
 	if m.asgRuleSets == nil {
 		m.asgRuleSets = make(map[enforcer.LiveChain]enforcer.RulesWithChain)

@@ -111,11 +111,18 @@ func (m *SinglePollCycle) DoPolicyCycle() error {
 }
 
 func (m *SinglePollCycle) DoASGCycle() error {
+	m.logger.Debug("start-DoASGCycle")
 	return m.SyncASGsForContainers() // syncs for all containers when arguments are empty
 }
 
 func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
+
+	m.logger.Debug("poll-cycle-asg-lock.before", lager.Data{"containers": containers})
+	t := time.Now()
+
 	m.asgMutex.Lock()
+
+	m.logger.Debug("poll-cycle-asg-lock.after", lager.Data{"duration": t})
 
 	if m.asgRuleSets == nil {
 		m.asgRuleSets = make(map[enforcer.LiveChain]enforcer.RulesWithChain)
@@ -182,12 +189,12 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 	}
 	m.asgMutex.Unlock()
 
-	if pollingLoop {
-		m.metricsSender.SendDuration(metricASGEnforceDuration, enforceDuration)
-		m.metricsSender.SendDuration(metricASGCleanupDuration, cleanupDuration)
-		pollDuration := time.Now().Sub(pollStartTime)
-		m.metricsSender.SendDuration(metricASGPollDuration, pollDuration)
-	}
+	//if pollingLoop {
+	m.metricsSender.SendDuration(metricASGEnforceDuration, enforceDuration)
+	m.metricsSender.SendDuration(metricASGCleanupDuration, cleanupDuration)
+	pollDuration := time.Now().Sub(pollStartTime)
+	m.metricsSender.SendDuration(metricASGPollDuration, pollDuration)
+	//}
 
 	return errors
 }

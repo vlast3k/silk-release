@@ -52,6 +52,7 @@ func (h *HttpResponseCodeError) Error() string {
 
 func (c *Client) Do(method, route string, reqData, respData interface{}, token string) error {
 	var reader io.Reader
+	c.Logger.Debug("http-do.request", lager.Data{"target ": method + " " + route, "data": reqData})
 	if method != "GET" && reqData != nil {
 		bodyBytes, err := c.Marshaler.Marshal(reqData)
 		if err != nil {

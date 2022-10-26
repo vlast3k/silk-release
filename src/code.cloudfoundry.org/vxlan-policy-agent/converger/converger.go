@@ -124,7 +124,7 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 	time.Sleep(1 * time.Millisecond)
 	m.asgMutex.Lock()
 
-	m.logger.Debug("poll-cycle-asg-lock.after"+strconv.Itoa(len(containers))+"_"+strconv.FormatInt(t, 10)+"_"+strconv.Itoa((int)(time.Now().UnixMilli()-t)/1000), lager.Data{"duration": time.Now().UnixMilli() - t, "containers": containers})
+	m.logger.Debug("poll-cycle-asg-lock.after_"+strconv.Itoa(len(containers))+"_"+strconv.FormatInt(t, 10)+"_"+strconv.Itoa((int)(time.Now().UnixMilli()-t)/1000), lager.Data{"duration": time.Now().UnixMilli() - t, "containers": containers})
 	time.Sleep(1 * time.Millisecond)
 
 	if m.asgRuleSets == nil {
@@ -146,6 +146,7 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 		asgrulesets, err := p.GetASGRulesAndChains(containers...)
 		if err != nil {
 			m.asgMutex.Unlock()
+			m.logger.Debug("poll-cycle-asg-lock.err", lager.Data{"err": err})
 			return fmt.Errorf("get-asg-rules: %s", err)
 		}
 
@@ -195,13 +196,13 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 		cleanupDuration = time.Now().Sub(cleanupStart)
 	}
 	m.asgMutex.Unlock()
-
 	//if pollingLoop {
 	m.metricsSender.SendDuration(metricASGEnforceDuration, enforceDuration)
 	m.metricsSender.SendDuration(metricASGCleanupDuration, cleanupDuration)
 	pollDuration := time.Now().Sub(pollStartTime)
 	m.metricsSender.SendDuration(metricASGPollDuration, pollDuration)
 	//}
+	m.logger.Debug("poll-cycle-asg.done" + strconv.FormatInt(t, 10))
 
 	return errors
 }

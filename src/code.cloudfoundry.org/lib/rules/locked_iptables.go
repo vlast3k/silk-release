@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"code.cloudfoundry.org/cf-networking-helpers/runner"
 )
@@ -194,8 +195,10 @@ func (l *LockedIPTables) DeleteAfterRuleNumKeepReject(table, chain string, ruleN
 	for range rules[ruleNum:] {
 		// rule numbers adjust after each deletion, so always delete the same number each time
 		fmt.Fprintf(os.Stderr, "DeleteAfterRuleNumKeepReject: %s %s %d", table, chain, ruleNum)
+		time.Sleep(100 * time.Millisecond)
 		err := l.IPTables.Delete(table, chain, fmt.Sprintf("%d", ruleNum), "--wait")
 		if err != nil {
+			fmt.Fprintf(os.Stderr, "errrrrrrrrrr")
 			return handleIPTablesError(err, l.Locker.Unlock())
 		}
 	}

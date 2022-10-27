@@ -184,22 +184,24 @@ func (e *Enforcer) Enforce(table, parentChain, chainPrefix, managedChainsRegex s
 		return "", fmt.Errorf("bulk appending: %s", err)
 	}
 
-	// logger.Debug("cleaning-up-old-rules", lager.Data{"chain": chain, "table": table, "rules": rulespec})
-	// err = e.cleanupOldRules(logger, table, parentChain, managedChainsRegex, cleanupParentChain, newTime)
-	// if err != nil {
-	// 	logger.Error("cleanup-rules", err)
-	// 	return chain, &CleanupErr{err}
-	// }
+	logger.Debug("cleaning-up-old-rules", lager.Data{"chain": chain, "table": table, "rules": rulespec})
+	err = e.cleanupOldRules(logger, table, parentChain, managedChainsRegex, cleanupParentChain, newTime)
+	if err != nil {
+		logger.Error("cleanup-rules", err)
+		return chain, &CleanupErr{err}
+	}
 
 	return chain, nil
 }
 
 func (e *Enforcer) cleanupOldRules(logger lager.Logger, table, parentChain, managedChainsRegex string, cleanupParentChain bool, newTime int64) error {
+	logger.Debug("cleaning-up-old-rules-1")
 	rulesList, err := e.iptables.List(table, parentChain)
 	if err != nil {
 		return fmt.Errorf("listing forward rules: %s", err)
 	}
 
+	logger.Debug("cleaning-up-old-rules-2")
 	reManagedChain := regexp.MustCompile(managedChainsRegex + "([0-9]{10,16})")
 
 	for _, r := range rulesList {
@@ -214,6 +216,8 @@ func (e *Enforcer) cleanupOldRules(logger lager.Logger, table, parentChain, mana
 			if oldTime < newTime {
 				logger.Debug("clean-up-old-chain", lager.Data{"name": matches[0]})
 				err = e.cleanupOldChain(logger, LiveChain{Table: table, Name: matches[0]}, parentChain)
+				logger.Debug("cleaning-up-old-rules-3")
+
 				if err != nil {
 					return err
 				}
@@ -226,6 +230,8 @@ func (e *Enforcer) cleanupOldRules(logger lager.Logger, table, parentChain, mana
 		// Nothing should be modifying the netout-* chains, as the first rule will always end up being a jump to the asg-*
 		// chain after ~60s, and it ends in a blanket REJECT, so no other rules would be effective anyway.
 		err := e.iptables.DeleteAfterRuleNumKeepReject(table, parentChain, 2)
+		logger.Debug("cleaning-up-old-rules-4")
+
 		if err != nil {
 			return fmt.Errorf("clean up parent chain: %s", err)
 		}

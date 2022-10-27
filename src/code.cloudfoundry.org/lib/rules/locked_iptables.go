@@ -178,7 +178,7 @@ func (l *LockedIPTables) DeleteAfterRuleNum(table, chain string, ruleNum int) er
 	}
 
 	return l.Locker.Unlock()
-}
+
 
 func (l *LockedIPTables) DeleteAfterRuleNumKeepReject(table, chain string, ruleNum int) error {
 	if err := l.Locker.Lock(); err != nil {
@@ -196,11 +196,7 @@ func (l *LockedIPTables) DeleteAfterRuleNumKeepReject(table, chain string, ruleN
 		// rule numbers adjust after each deletion, so always delete the same number each time
 		fmt.Fprintf(os.Stderr, "DeleteAfterRuleNumKeepReject: %s %s %d", table, chain, ruleNum)
 		time.Sleep(100 * time.Millisecond)
-		err := l.IPTables.Delete(table, chain, fmt.Sprintf("%d", ruleNum), "--wait")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "errrrrrrrrrr")
-			return handleIPTablesError(err, l.Locker.Unlock())
-		}
+
 	}
 	fmt.Fprintf(os.Stderr, "AppendUnique:")
 	err = l.IPTables.AppendUnique(table, chain, NewInputDefaultRejectRule()...)

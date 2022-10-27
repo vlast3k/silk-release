@@ -87,8 +87,8 @@ func (m *SinglePollCycle) DoPolicyCycle() error {
 				"message":       "updating iptables rules",
 				"num old rules": len(oldRuleSet.Rules),
 				"num new rules": len(ruleSet.Rules),
-				"old rules":     oldRuleSet,
-				"new rules":     ruleSet,
+				//"old rules":     oldRuleSet,
+				//"new rules":     ruleSet,
 			})
 			_, err = m.enforcer.EnforceRulesAndChain(ruleSet)
 			if err != nil {
@@ -161,8 +161,8 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 					"message":       "updating iptables rules",
 					"num old rules": len(oldRuleSet.Rules),
 					"num new rules": len(ruleset.Rules),
-					"old rules":     oldRuleSet,
-					"new rules":     ruleset,
+					//"old rules":     oldRuleSet,
+					//"new rules":     ruleset,
 				})
 				time.Sleep(1 * time.Millisecond)
 				chain, err := m.enforcer.EnforceRulesAndChain(ruleset)
@@ -176,8 +176,8 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 					m.updateRuleSet(chainKey, chain, ruleset)
 				}
 			} else {
-				m.logger.Debug("poll-cycle-asg.-notingtodo")
-				time.Sleep(1 * time.Millisecond)
+				//m.logger.Debug("poll-cycle-asg.-notingtodo")
+				//time.Sleep(1 * time.Millisecond)
 			}
 			desiredChains = append(desiredChains, enforcer.LiveChain{Table: ruleset.Chain.Table, Name: m.containerToASGChain[chainKey]})
 		}
@@ -195,7 +195,7 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 		}
 		cleanupDuration = time.Now().Sub(cleanupStart)
 	}
-	m.asgMutex.Unlock()
+
 	//if pollingLoop {
 	m.metricsSender.SendDuration(metricASGEnforceDuration, enforceDuration)
 	m.metricsSender.SendDuration(metricASGCleanupDuration, cleanupDuration)
@@ -203,6 +203,7 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 	m.metricsSender.SendDuration(metricASGPollDuration, pollDuration)
 	//}
 	m.logger.Debug("poll-cycle-asg.done" + strconv.FormatInt(t, 10))
+	m.asgMutex.Unlock()
 
 	return errors
 }

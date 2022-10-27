@@ -111,7 +111,7 @@ func (e *Enforcer) CleanChainsMatching(regex *regexp.Regexp, desiredChains []Liv
 		e.Logger.Error(fmt.Sprintf("list-chains-%s", FilterTable), err)
 		return []LiveChain{}, fmt.Errorf("listing chains in %s: %s", FilterTable, err)
 	}
-	e.Logger.Debug("allchains", lager.Data{"chains": allChains})
+	e.Logger.Debug("allchains") //, lager.Data{"chains": allChains})
 
 	for _, chainName := range allChains {
 		if regex.MatchString(chainName) {
@@ -122,7 +122,7 @@ func (e *Enforcer) CleanChainsMatching(regex *regexp.Regexp, desiredChains []Liv
 	}
 
 	for _, chain := range chainsToDelete {
-		e.Logger.Debug("deleting-chain-in-enforce-chains-matching", lager.Data{"chain": chain})
+		e.Logger.Debug("deleting-chain-in-enforce-chains-matching") //, lager.Data{"chain": chain})
 		err := e.deleteChain(e.Logger, chain)
 		if err != nil {
 			e.Logger.Error(fmt.Sprintf("delete-chain-%s-from-%s", chain.Name, chain.Table), err)
@@ -173,7 +173,7 @@ func (e *Enforcer) Enforce(table, parentChain, chainPrefix, managedChainsRegex s
 		return "", fmt.Errorf("inserting chain: %s", err)
 	}
 
-	logger.Debug("bulk-append", lager.Data{"chain": chain, "table": table, "rules": rulespec})
+	logger.Debug("bulk-append", lager.Data{"chain": chain, "table": table}) //, "rules": rulespec})
 	err = e.iptables.BulkAppend(table, chain, rulespec...)
 	if err != nil {
 		logger.Error("bulk-append", err)
@@ -184,7 +184,7 @@ func (e *Enforcer) Enforce(table, parentChain, chainPrefix, managedChainsRegex s
 		return "", fmt.Errorf("bulk appending: %s", err)
 	}
 
-	logger.Debug("cleaning-up-old-rules", lager.Data{"chain": chain, "table": table, "rules": rulespec})
+	logger.Debug("cleaning-up-old-rules", lager.Data{"chain": chain, "table": table}) //, "rules": rulespec})
 	err = e.cleanupOldRules(logger, table, parentChain, managedChainsRegex, cleanupParentChain, newTime)
 	if err != nil {
 		logger.Error("cleanup-rules", err)

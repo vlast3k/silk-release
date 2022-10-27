@@ -195,7 +195,7 @@ func (e *Enforcer) Enforce(table, parentChain, chainPrefix, managedChainsRegex s
 }
 
 func (e *Enforcer) cleanupOldRules(logger lager.Logger, table, parentChain, managedChainsRegex string, cleanupParentChain bool, newTime int64) error {
-	logger.Debug("cleaning-up-old-rules-1")
+	logger.Debug("cleaning-up-old-rules-1", lager.Data{"table": table, "parentChain": parentChain})
 	rulesList, err := e.iptables.List(table, parentChain)
 	if err != nil {
 		return fmt.Errorf("listing forward rules: %s", err)
@@ -229,8 +229,9 @@ func (e *Enforcer) cleanupOldRules(logger lager.Logger, table, parentChain, mana
 		// Everything else is either an original rule from before asg-syncing kicked in, or the previous asg-* chain jump rule
 		// Nothing should be modifying the netout-* chains, as the first rule will always end up being a jump to the asg-*
 		// chain after ~60s, and it ends in a blanket REJECT, so no other rules would be effective anyway.
+		logger.Debug("cleaning-up-old-rules-4a", lager.Data{"table": table, "parentchaibn": parentChain})
 		err := e.iptables.DeleteAfterRuleNumKeepReject(table, parentChain, 2)
-		logger.Debug("cleaning-up-old-rules-4")
+		logger.Debug("cleaning-up-old-rules-4b")
 
 		if err != nil {
 			return fmt.Errorf("clean up parent chain: %s", err)

@@ -2,10 +2,8 @@ package rules
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
-	"time"
 
 	"code.cloudfoundry.org/cf-networking-helpers/runner"
 )
@@ -194,20 +192,15 @@ func (l *LockedIPTables) DeleteAfterRuleNumKeepReject(table, chain string, ruleN
 	//so this takes the place of the '0' index of rules, and we don't need to offset anything
 	for range rules[ruleNum:] {
 		// rule numbers adjust after each deletion, so always delete the same number each time
-		fmt.Fprintf(os.Stderr, "DeleteAfterRuleNumKeepReject: %s %s %d", table, chain, ruleNum)
-		time.Sleep(100 * time.Millisecond)
-		// err := l.IPTables.Delete(table, chain, fmt.Sprintf("%d", ruleNum), "--wait")
-		// if err != nil {
-		// 	fmt.Fprintf(os.Stderr, "errrrrrrrrrr")
-		// 	return handleIPTablesError(err, l.Locker.Unlock())
-		// }
+		err := l.IPTables.Delete(table, chain, fmt.Sprintf("%d", ruleNum), "--wait")
+		if err != nil {
+			return handleIPTablesError(err, l.Locker.Unlock())
+		}
 	}
-	fmt.Fprintf(os.Stderr, "AppendUnique:")
 	err = l.IPTables.AppendUnique(table, chain, NewInputDefaultRejectRule()...)
 	if err != nil {
 		return handleIPTablesError(err, l.Locker.Unlock())
 	}
-	fmt.Fprintf(os.Stderr, "DeleteAfterRuleNumKeepReject: end")
 
 	return l.Locker.Unlock()
 }

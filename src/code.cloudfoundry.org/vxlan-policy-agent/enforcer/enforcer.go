@@ -184,12 +184,12 @@ func (e *Enforcer) Enforce(table, parentChain, chainPrefix, managedChainsRegex s
 		return "", fmt.Errorf("bulk appending: %s", err)
 	}
 
-	logger.Debug("cleaning-up-old-rules", lager.Data{"chain": chain, "table": table, "rules": rulespec})
-	err = e.cleanupOldRules(logger, table, parentChain, managedChainsRegex, cleanupParentChain, newTime)
-	if err != nil {
-		logger.Error("cleanup-rules", err)
-		return chain, &CleanupErr{err}
-	}
+	// logger.Debug("cleaning-up-old-rules", lager.Data{"chain": chain, "table": table, "rules": rulespec})
+	// err = e.cleanupOldRules(logger, table, parentChain, managedChainsRegex, cleanupParentChain, newTime)
+	// if err != nil {
+	// 	logger.Error("cleanup-rules", err)
+	// 	return chain, &CleanupErr{err}
+	// }
 
 	return chain, nil
 }

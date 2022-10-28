@@ -111,7 +111,7 @@ func (e *Enforcer) CleanChainsMatching(regex *regexp.Regexp, desiredChains []Liv
 		e.Logger.Error(fmt.Sprintf("list-chains-%s", FilterTable), err)
 		return []LiveChain{}, fmt.Errorf("listing chains in %s: %s", FilterTable, err)
 	}
-	e.Logger.Debug("allchains") //, lager.Data{"chains": allChains})
+	e.Logger.Debug("allchains-" + strconv.Itoa(len(allChains))) //, lager.Data{"chains": allChains})
 
 	for _, chainName := range allChains {
 		if regex.MatchString(chainName) {

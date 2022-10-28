@@ -210,8 +210,12 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 func (m *SinglePollCycle) CleanupOrphanedASGsChains(containerHandle string) error {
 	m.asgMutex.Lock()
 	defer m.asgMutex.Unlock()
-
-	return m.cleanupASGsChains(planner.ASGChainPrefix(containerHandle), []enforcer.LiveChain{})
+	var cleanupDuration time.Duration
+	cleanupStart := time.Now()
+	cleanupDuration = time.Now().Sub(cleanupStart)
+	err := m.cleanupASGsChains(planner.ASGChainPrefix(containerHandle), []enforcer.LiveChain{})
+	m.metricsSender.SendDuration(metricASGCleanupDuration, cleanupDuration)
+	return err
 }
 
 func (m *SinglePollCycle) updateRuleSet(chainKey enforcer.LiveChain, chain string, ruleset enforcer.RulesWithChain) {
@@ -221,7 +225,7 @@ func (m *SinglePollCycle) updateRuleSet(chainKey enforcer.LiveChain, chain strin
 }
 
 func (m *SinglePollCycle) cleanupASGsChains(prefix string, desiredChains []enforcer.LiveChain) error {
-	m.logger.Debug("policy-cycle-asg.start", lager.Data{
+	m.logger.Debug("policy-cycle-asg.start-"+prefix+"_"+strconv.Itoa(len(desiredChains)), lager.Data{
 		"desired-chains": desiredChains,
 	})
 	deletedChains, err := m.enforcer.CleanChainsMatching(regexp.MustCompile(prefix), desiredChains)

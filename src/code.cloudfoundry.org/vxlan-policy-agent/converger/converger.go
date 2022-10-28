@@ -106,7 +106,7 @@ func (m *SinglePollCycle) DoPolicyCycle() error {
 	pollDuration := time.Now().Sub(pollStartTime)
 	m.metricsSender.SendDuration(metricEnforceDuration, enforceDuration)
 	m.metricsSender.SendDuration(metricPollDuration, pollDuration)
-
+	m.logger.Debug("poll-cycle.end")
 	return nil
 }
 
@@ -118,7 +118,6 @@ func (m *SinglePollCycle) DoASGCycle() error {
 func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 
 	t := time.Now().UnixMilli()
-	defer m.logger.Debug("poll-cycle-asg.done")
 
 	m.logger.Debug("poll-cycle-asg-lock.before_"+strconv.Itoa(len(containers))+"_"+strconv.FormatInt(t, 10), lager.Data{"containers": containers})
 	time.Sleep(1 * time.Millisecond)
@@ -222,6 +221,9 @@ func (m *SinglePollCycle) updateRuleSet(chainKey enforcer.LiveChain, chain strin
 }
 
 func (m *SinglePollCycle) cleanupASGsChains(prefix string, desiredChains []enforcer.LiveChain) error {
+	m.logger.Debug("policy-cycle-asg.start", lager.Data{
+		"desired-chains": desiredChains,
+	})
 	deletedChains, err := m.enforcer.CleanChainsMatching(regexp.MustCompile(prefix), desiredChains)
 	if err != nil {
 		return fmt.Errorf("clean-up-orphaned-asg-chains: %s", err)

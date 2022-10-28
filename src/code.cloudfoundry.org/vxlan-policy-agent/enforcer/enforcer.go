@@ -105,7 +105,7 @@ func (e *Enforcer) CleanChainsMatching(regex *regexp.Regexp, desiredChains []Liv
 	}
 
 	var chainsToDelete []LiveChain
-
+	e.Logger.Debug("CleanChainsMatching - before list-chains")
 	allChains, err := e.iptables.ListChains(FilterTable)
 	if err != nil {
 		e.Logger.Error(fmt.Sprintf("list-chains-%s", FilterTable), err)
@@ -266,7 +266,7 @@ func (e *Enforcer) deleteChain(logger lager.Logger, chain LiveChain) error {
 	for _, rule := range rules {
 		matches := reJumpRule.FindStringSubmatch(rule)
 		if len(matches) > 1 {
-			logger.Debug("found-target-chain-to-recurse", lager.Data{"table": chain.Table, "chain": chain.Name, "target-chain": matches[1]})
+			//logger.Debug("found-target-chain-to-recurse", lager.Data{"table": chain.Table, "chain": chain.Name, "target-chain": matches[1]})
 			jumpTargets[matches[1]] = struct{}{}
 		}
 	}

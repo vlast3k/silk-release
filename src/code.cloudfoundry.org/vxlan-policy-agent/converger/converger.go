@@ -212,8 +212,8 @@ func (m *SinglePollCycle) CleanupOrphanedASGsChains(containerHandle string) erro
 	defer m.asgMutex.Unlock()
 	var cleanupDuration time.Duration
 	cleanupStart := time.Now()
-	cleanupDuration = time.Now().Sub(cleanupStart)
 	err := m.cleanupASGsChains(planner.ASGChainPrefix(containerHandle), []enforcer.LiveChain{})
+	cleanupDuration = time.Now().Sub(cleanupStart)
 	m.metricsSender.SendDuration(metricASGCleanupDuration, cleanupDuration)
 	return err
 }
@@ -247,6 +247,7 @@ func (m *SinglePollCycle) cleanupASGsChains(prefix string, desiredChains []enfor
 		}
 	}
 
+	time.Sleep(100 * time.Millisecond)
 	return nil
 }
 

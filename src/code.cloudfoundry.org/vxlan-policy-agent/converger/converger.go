@@ -193,6 +193,7 @@ func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
 			errors = multierror.Append(errors, err)
 		}
 		cleanupDuration = time.Now().Sub(cleanupStart)
+		m.logger.Debug("poll-cycle-asg.cleanup=" + strconv.FormatInt(int64(cleanupDuration.Seconds()), 10))
 	}
 
 	//if pollingLoop {

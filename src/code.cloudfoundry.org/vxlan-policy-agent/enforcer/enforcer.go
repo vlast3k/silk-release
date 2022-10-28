@@ -260,6 +260,8 @@ func (e *Enforcer) deleteChain(logger lager.Logger, chain LiveChain) error {
 	if err != nil {
 		return fmt.Errorf("list rules for chain: %s", err)
 	}
+	allChains, err := e.iptables.ListChains(FilterTable)
+	e.Logger.Debug("allchains-" + strconv.Itoa(len(allChains))) //, lager.Data{"chains": allChains})
 
 	reJumpRule := regexp.MustCompile(fmt.Sprintf(`-A\s+%s\s+.*-g\s+([^\s]+)`, chain.Name))
 	jumpTargets := map[string]struct{}{}
@@ -270,18 +272,24 @@ func (e *Enforcer) deleteChain(logger lager.Logger, chain LiveChain) error {
 			jumpTargets[matches[1]] = struct{}{}
 		}
 	}
+	allChains, err = e.iptables.ListChains(FilterTable)
+	e.Logger.Debug("allchains-" + strconv.Itoa(len(allChains))) //, lager.Data{"chains": allChains})
 
 	logger.Debug("flush-chain", lager.Data{"table": chain.Table, "chain": chain.Name})
 	err = e.iptables.ClearChain(chain.Table, chain.Name)
 	if err != nil {
 		return fmt.Errorf("cleanup old chain: %s", err)
 	}
+	allChains, err = e.iptables.ListChains(FilterTable)
+	e.Logger.Debug("allchains-" + strconv.Itoa(len(allChains))) //, lager.Data{"chains": allChains})
 
 	logger.Debug("delete-chain", lager.Data{"table": chain.Table, "chain": chain.Name})
 	err = e.iptables.DeleteChain(chain.Table, chain.Name)
 	if err != nil {
 		return fmt.Errorf("delete old chain: %s", err)
 	}
+	allChains, err = e.iptables.ListChains(FilterTable)
+	e.Logger.Debug("allchains-" + strconv.Itoa(len(allChains))) //, lager.Data{"chains": allChains})
 
 	for target, _ := range jumpTargets {
 		logger.Debug("deleting-target-chain", lager.Data{"table": chain.Table, "target-chain": target})
@@ -289,6 +297,8 @@ func (e *Enforcer) deleteChain(logger lager.Logger, chain LiveChain) error {
 			return fmt.Errorf("cleanup jump target %s: %s", target, err)
 		}
 	}
+	allChains, err = e.iptables.ListChains(FilterTable)
+	e.Logger.Debug("allchains-" + strconv.Itoa(len(allChains))) //, lager.Data{"chains": allChains})
 
 	return nil
 }

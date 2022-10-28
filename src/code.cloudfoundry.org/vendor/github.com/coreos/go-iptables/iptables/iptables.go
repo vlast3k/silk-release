@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -109,6 +110,7 @@ func Timeout(timeout int) option {
 // For backwards compatibility, by default always uses IPv4 and timeout 0.
 // i.e. you can create an IPv6 IPTables using a timeout of 5 seconds passing
 // the IPFamily and Timeout options as follow:
+//
 //	ip6t := New(IPFamily(ProtocolIPv6), Timeout(5))
 func New(opts ...option) (*IPTables, error) {
 
@@ -447,6 +449,7 @@ func (ipt *IPTables) RenameChain(table, oldChain, newChain string) error {
 // DeleteChain deletes the chain in the specified table.
 // The chain must be empty
 func (ipt *IPTables) DeleteChain(table, chain string) error {
+	fmt.Fprintf(os.Stderr, "delete chain: %s\n", chain)
 	return ipt.run("-t", table, "-X", chain)
 }
 
@@ -619,7 +622,7 @@ func iptablesHasWaitCommand(v1 int, v2 int, v3 int) bool {
 	return false
 }
 
-//Checks if an iptablse version is after 1.6.0, when --wait support second
+// Checks if an iptablse version is after 1.6.0, when --wait support second
 func iptablesWaitSupportSecond(v1 int, v2 int, v3 int) bool {
 	if v1 > 1 {
 		return true

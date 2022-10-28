@@ -2,6 +2,7 @@ package rules
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -258,6 +259,7 @@ func (l *LockedIPTables) ClearChain(table, chain string) error {
 	return l.chainExec(table, chain, l.IPTables.ClearChain)
 }
 func (l *LockedIPTables) DeleteChain(table, chain string) error {
+	fmt.Fprintf(os.Stderr, "delete chain: %s\n", chain)
 	return l.chainExec(table, chain, l.IPTables.DeleteChain)
 }
 

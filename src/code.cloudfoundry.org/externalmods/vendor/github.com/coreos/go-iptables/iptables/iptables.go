@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -334,6 +335,7 @@ func (ipt *IPTables) RenameChain(table, oldChain, newChain string) error {
 // DeleteChain deletes the chain in the specified table.
 // The chain must be empty
 func (ipt *IPTables) DeleteChain(table, chain string) error {
+	fmt.Fprintf(os.Stderr, "delete chain: %s\n", chain)
 	return ipt.run("-t", table, "-X", chain)
 }
 

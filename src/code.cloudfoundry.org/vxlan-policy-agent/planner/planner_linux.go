@@ -211,7 +211,7 @@ func (p *VxlanPolicyPlanner) GetASGRulesAndChains(specifiedContainers ...string)
 				ParentChain:        parentChainName,
 				Prefix:             ASGChainPrefix(container.Handle),
 				ManagedChainsRegex: ASGManagedChainsRegex,
-				CleanUpParentChain: false,
+				CleanUpParentChain: true,
 			},
 			Rules:     reverseOrderIptablesRules(iptablesRules, defaultRules),
 			LogConfig: container.LogConfig,

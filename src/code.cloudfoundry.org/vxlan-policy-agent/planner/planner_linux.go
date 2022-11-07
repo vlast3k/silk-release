@@ -143,12 +143,14 @@ func (p *VxlanPolicyPlanner) GetPolicyRulesAndChain() (enforcer.RulesWithChain, 
 
 func (p *VxlanPolicyPlanner) GetASGRulesAndChains(specifiedContainers ...string) ([]enforcer.RulesWithChain, error) {
 	allContainers, err := p.readFile(specifiedContainers...)
+	//fmt.Fprintf(os.Stderr, "GetASGRulesAndChains allContainers: %+v\n", allContainers)
 	if err != nil {
 		p.Logger.Error("datastore", err)
 		return nil, err
 	}
 
 	securityGroups, err := p.getContainerSecurityGroups(allContainers)
+	//	fmt.Fprintf(os.Stderr, "GetASGRulesAndChains securityGroups: %+v\n", securityGroups)
 	if err != nil {
 		p.Logger.Error("policy-client-get-security-group-rules", err)
 		return nil, err
@@ -184,7 +186,8 @@ func (p *VxlanPolicyPlanner) GetASGRulesAndChains(specifiedContainers ...string)
 			continue
 		}
 
-		parentChainName := p.NetOutChain.Name(container.Handle)
+		parentChainName := p.NetOutChain.Name(container.Handle) //parent chain is netout--container_guid,
+		//fmt.Fprintf(os.Stderr, "GetASGRulesAndChains parentChainName: %+v, container.Handle: %+v\n", parentChainName, container.Handle)
 		var sgRules []policy_client.SecurityGroupRule
 		if container.Purpose == "staging" {
 			sgRules = append(defaultStagingRules, stagingRulesForSpace[container.SpaceID]...)

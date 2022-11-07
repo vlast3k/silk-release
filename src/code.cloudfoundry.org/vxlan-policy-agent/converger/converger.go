@@ -116,7 +116,7 @@ func (m *SinglePollCycle) DoASGCycle() error {
 }
 
 func (m *SinglePollCycle) SyncASGsForContainers(containers ...string) error {
-
+	//fmt.Fprintf(os.Stderr, "SyncASGsForContainers %+v\n", containers)
 	t := time.Now().UnixMilli()
 
 	m.logger.Debug("poll-cycle-asg-lock.before_"+strconv.Itoa(len(containers))+"_"+strconv.FormatInt(t, 10), lager.Data{"containers": containers})

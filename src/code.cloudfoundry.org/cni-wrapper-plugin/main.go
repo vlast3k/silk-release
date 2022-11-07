@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"runtime/debug"
 	"sync"
 
 	"code.cloudfoundry.org/cni-wrapper-plugin/adapter"
@@ -29,6 +30,7 @@ import (
 )
 
 func cmdAdd(args *skel.CmdArgs) error {
+	debug.PrintStack()
 	cfg, err := lib.LoadWrapperConfig(args.StdinData)
 	if err != nil {
 		return err
@@ -191,17 +193,21 @@ func cmdAdd(args *skel.CmdArgs) error {
 		}
 	}
 
-	netOutRules := cfg.RuntimeConfig.NetOutRules
-	if err := netOutProvider.BulkInsertRules(netrules.NewRulesFromGardenNetOutRules(netOutRules)); err != nil {
-		return fmt.Errorf("bulk insert: %s", err) // not tested
-	}
-
 	//fmt.Fprintf(os.Stderr, "force-asgs-for-container vladi: %s", args.ContainerID)
 	//fmt.Fprintf(os.Stdout, "force-asgs-for-container vladi oooooooo: %s", args.ContainerID)
 	resp, err = http.DefaultClient.Get(fmt.Sprintf("http://%s/force-asgs-for-container?container=%s", cfg.PolicyAgentForcePollAddress, args.ContainerID))
 	if err != nil {
 		return err
 	}
+
+	if resp.StatusCode == http.StatusMethodNotAllowed {
+		fmt.Fprintf(os.Stderr, "cni-wrappper-plugin - applying Netout rules, as ASGs are disabled")
+		netOutRules := cfg.RuntimeConfig.NetOutRules
+		if err := netOutProvider.BulkInsertRules(netrules.NewRulesFromGardenNetOutRules(netOutRules)); err != nil {
+			return fmt.Errorf("bulk insert: %s", err) // not tested
+		}
+	}
+
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusMethodNotAllowed {
 		body, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()

@@ -191,10 +191,10 @@ func cmdAdd(args *skel.CmdArgs) error {
 		}
 	}
 
-	netOutRules := cfg.RuntimeConfig.NetOutRules
-	if err := netOutProvider.BulkInsertRules(netrules.NewRulesFromGardenNetOutRules(netOutRules)); err != nil {
-		return fmt.Errorf("bulk insert: %s", err) // not tested
-	}
+	// netOutRules := cfg.RuntimeConfig.NetOutRules
+	// if err := netOutProvider.BulkInsertRules(netrules.NewRulesFromGardenNetOutRules(netOutRules)); err != nil {
+	// 	return fmt.Errorf("bulk insert: %s", err) // not tested
+	// }
 
 	resp, err = http.DefaultClient.Get(fmt.Sprintf("http://%s/force-asgs-for-container?container=%s", cfg.PolicyAgentForcePollAddress, args.ContainerID))
 	if err != nil {
